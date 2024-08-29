@@ -1,0 +1,239 @@
+{% extends 'chat/chat_base.html' %}
+{% block content %}
+<section class="container">
+    <h2 class="text-center fs-3">{{current_chat.title}}</h2>
+    <div>
+
+        <a class="nav-link fs-4" href="#settings_chat" data-bs-toggle="modal"
+           data-bs-target="#settings_chat">Настройки</a>
+
+    </div>
+    <div class="dropdown mb-5">
+        <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Добавить участников
+        </button>
+        <ul class="dropdown-menu">
+            {% for user in all_users %}
+            <li><a class="dropdown-item" href="/add_user/{{current_chat.id}}/{{user.id}}">{{user.login}}</a></li>
+            {% endfor %}
+        </ul>
+    </div>
+    <div class="chat-container row row-cols-1" id="chatContainer">
+        {% for m in messages %}
+        {% if m.user.email == request.session.user %}
+        <div class="col message bg-secondary-subtle">
+            <span class="user">{{m.user.login}}</span>
+            <span class="datetime">{{m.datetime}}</span>
+            <span class="text">{{m.text}}</span>
+            <a href="/del_mess/{{m.id}}/{{current_chat.id}}" class="btn btn-danger">Удалить</a>
+        </div>
+        {% else %}
+        <div class="message col">
+            <span class="user">{{m.user.login}}</span>
+            <span class="datetime">{{m.datetime}}</span>
+            <span class="text">{{m.text}}</span>
+        </div>
+        {% endif %}
+        {% endfor %}
+    </div>
+    <div class="message-input">
+        <input type="text" class="form-control enter-click" id="messageInput" placeholder="Введите сообщение">
+        <input type="file" name="file" id="file">
+        <button class="btn btn-primary mt-2" onclick="sendMessage()">Отправить</button>
+    </div>
+</section>
+
+
+<div class="modal fade" id="settings_chat" tabindex="-1" aria-labelledby="settingsLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="settingsLabel">Создать</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+            </div>
+            <div class="modal-body">
+                {% if request.session.user == current_chat.creator.email %}
+                <form enctype="multipart/form-data" action="/settings_chat" method="post">
+                    <input type="hidden" name="id_chat" value="{{current_chat.id}}">
+                    <div class="alert alert-danger fade show" style="display: none" role="alert"></div>
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="title">Название</label>
+                        <input type="text" name="title" class="form-control" id="title" value="{{current_chat.title}}"
+                               placeholder="Название чата">
+                    </div>
+                    <div class="form-group">
+                        <label for="description">Описание</label>
+                        <input type="text" name="description" class="form-control" id="description">
+                    </div>
+                    <div class="form-group">
+                        <div>
+                            {% if current_chat.avatar != None %}
+                            <img src="/media/{{current_chat.avatar}}" width="200px">
+                            {% endif %}
+                        </div>
+                        <label for="avatar">Аватарка</label>
+                        <input type="file" name="avatar_chat" class="form-control" id="avatar">
+                    </div>
+                    <button class="btn btn-primary">Изменить чат</button>
+                </form>
+                {% endif %}
+                <div class="container mt-3" id="users-online">
+                    {% for user in current_chat.users.all %}
+
+                    <div class="row">
+                        <div>
+                            {% if user.avatar == None %}
+                            <img src="/media/avatars/default.png" width="70px">
+                            {% else %}
+                            <img src="/media/{{user.avatar}}" width="70px">
+                            {% endif %}
+                        </div>
+                        {{user.login}}
+                        {{user.update_date|date:"d.m.Y H:i"}}
+                        {% if current_date == user.update_date|date:"Y-m-d" %}
+                        {% if current_time == user.update_date|date:"H:i" %}
+                        Online
+                        {% endif %}
+                        {% endif %}
+
+                    </div>
+
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="modal-footer">
+                <a class="btn btn-danger" href="/del_chat/{{current_chat.id}}">Удалить чат</a>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    let socket;
+    let socket_online;
+    let messageQueue = [];
+
+    function connectWebSocket() {
+        socket = new WebSocket('ws://127.0.0.1:8000/ws');
+        socket_online = new WebSocket('ws://127.0.0.1:8000/online');
+
+        socket.onopen = function(e) {
+            console.log('WebSocket is open now.');
+            while (messageQueue.length > 0) {
+                let queuedMessage = messageQueue.shift();
+                socket.send(queuedMessage);
+            }
+            setInterval(function() {
+                if (socket.readyState === WebSocket.OPEN) {
+                    socket.send(JSON.stringify({
+                        message: 'list',
+                        chat: {{current_chat.id}},
+                        user: '{{request.session.user}}'
+                    }));
+                }
+            }, 1000);
+        };
+
+        socket_online.onopen = function(e) {
+            console.log('WebSocket for online status is open now.');
+            setInterval(function() {
+                if (socket_online.readyState === WebSocket.OPEN) {
+                    socket_online.send(JSON.stringify({
+                        message: 'list',
+                        chat: {{current_chat.id}}
+                    }));
+                }
+            }, 1000);
+        };
+
+        socket.onmessage = function(event) {
+            try {
+                document.getElementById('chatContainer').innerHTML = JSON.parse(event['data'])['message'];
+                console.log(JSON.parse(event['data']));
+            } catch (e) {
+                console.log('Error:', e.message);
+            }
+        };
+
+        socket_online.onmessage = function(event) {
+            let data = JSON.parse(event['data'])['message'];
+            document.getElementById('users_online').innerHTML = data;
+        };
+
+        socket.onclose = function(e) {
+            console.log('WebSocket is closed now. Reconnecting...');
+            setTimeout(connectWebSocket, 1000);
+        };
+
+        socket.onerror = function(error) {
+            console.log('WebSocket error: ' + error.message);
+        };
+
+        socket_online.onclose = function(e) {
+            console.log('WebSocket for online status is closed now. Reconnecting...');
+            setTimeout(connectWebSocket, 1000);
+        };
+
+        socket_online.onerror = function(error) {
+            console.log('WebSocket error for online status: ' + error.message);
+        };
+    }
+
+    connectWebSocket();
+
+    var chatContainer = document.getElementById('chatContainer');
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+
+    function sendMessage() {
+        var messageInput = document.getElementById('messageInput');
+        var messageText = messageInput.value.trim();
+        var fileInput = document.getElementById('file');
+        var file = fileInput.files[0];
+
+        var data = {
+            message: messageText,
+            user: '{{request.session.user}}',
+            chat: {{current_chat.id}}
+        };
+
+        if (messageText !== "" || file) {
+            if (messageText !== "") {
+                var newMessage = document.createElement('div');
+                newMessage.classList.add('message');
+                newMessage.innerHTML = '<span class="user">{{request.session.user}}:</span> <span class="text">' + messageText + '</span>';
+                chatContainer.appendChild(newMessage);
+                messageInput.value = "";
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }
+
+            if (file) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    data['file'] = e.target.result;
+                    data['filename'] = file.name;
+
+                    let messageData = JSON.stringify(data);
+                    if (socket.readyState === WebSocket.OPEN) {
+                        socket.send(messageData);
+                    } else {
+                        console.log('WebSocket is closed. Queuing the message.');
+                        messageQueue.push(messageData);
+                    }
+                };
+                reader.readAsDataURL(file);
+            } else {
+                let messageData = JSON.stringify(data);
+
+                if (socket.readyState === WebSocket.OPEN) {
+                    socket.send(messageData);
+                } else {
+                    console.log('WebSocket is closed. Queuing the message.');
+                    messageQueue.push(messageData);
+                }
+            }
+        } else {
+            alert('Пустое значение!');
+        }
+    }
+</script>
+{% endblock %}

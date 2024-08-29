@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <title>Чат</title>
+    <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/css/app.css">
+</head>
+<body>
+<div class="sidebar bg-secondary-subtle">
+    <a href="/profile" class="active fs-4">Профиль</a>
+    <a href="/settings" class="fs-4">Настройки</a>
+    <a class="nav-link fs-4" href="#create_chat" data-bs-toggle="modal" data-bs-target="#create_chat">Создать чат</a>
+    <a class="click_chat fs-4">Чат</a>
+    {% for chat in chats %}
+    <div>
+        <a href="/chat/{{chat.id}}">
+            <img src="/media/{{chat.avatar}}" width="50px" style="border-radius: 50%">
+            {{chat.title|truncatechars:14}}
+        </a>
+    </div>
+    {% endfor %}
+</div>
+<div class="content">
+    <div class="mt-3">
+        {% block content %} {% endblock %}
+    </div>
+</div>
+
+<div class="modal fade" id="create_chat" tabindex="-1" aria-labelledby="createLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="createLabel">Создать</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+            </div>
+            <div class="modal-body">
+                <form action="/create_chat" method="post">
+                    <div class="alert alert-danger fade show" style="display: none" role="alert"></div>
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="title">Название</label>
+                        <input type="text" name="title" class="form-control" id="title" placeholder="Название чата">
+                    </div>
+                    <div class="form-group">
+                        <label for="description">Описание</label>
+                        <input type="text" name="description" class="form-control" id="description">
+                    </div>
+                    <button class="btn btn-primary">Создать чат</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="/static/js/popper.min.js" crossorigin="anonymous"></script>
+<script src="/static/js/bootstrap.min.js" crossorigin="anonymous"></script>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="/static/js/app.js"></script>
+</body>
+</html>

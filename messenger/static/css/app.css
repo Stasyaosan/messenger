@@ -1,0 +1,49 @@
+.chat-container {
+
+        padding: 15px;
+        max-height: 400px;
+        overflow-y: auto;
+    }
+    .message {
+        margin-bottom: 10px;
+    }
+    .message .user {
+        font-weight: bold;
+    }
+    .message .text {
+        display: inline-block;
+
+        padding: 8px 12px;
+        border-radius: 5px;
+    }
+    .message-input {
+        margin-top: 15px;
+    }
+
+body {
+            display: flex;
+        }
+        .sidebar {
+            min-width: 250px;
+            max-width: 250px;
+            padding: 15px;
+            height: 100vh;
+            position: fixed;
+        }
+        .sidebar a {
+            display: block;
+            padding: 3px 15px;
+            margin-bottom: 10px;
+
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .sidebar a:hover {
+
+        }
+        .content {
+            margin-left: 250px;
+            padding: 20px;
+            flex-grow: 1;
+        }
+

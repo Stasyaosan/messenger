@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% block title %}Meow messenger{% endblock %}
+{% block content %}
+<header class="bg-secondary-subtle p-5 text-center">
+    <h1 class="display-4">Meow Messenger</h1>
+    <p class="lead">Общайтесь с друзьями и колегами легко и просто!</p>
+    <a href="#" class="btn btn-primary btn-lg">Начать</a>
+</header>
+<section class="container my-5">
+    <div class="row">
+        <div class="col-md-4">
+            <h3>Мгновенные сообщения</h3>
+            <p>Отправляйте и получайте сообщения в режиме реального времени.</p>
+        </div>
+        <div class="col-md-4">
+            <h3>Групповые чаты</h3>
+            <p>Создавайте групповые чаты для общения с друзьями и коллегами.</p>
+        </div>
+        <div class="col-md-4">
+            <h3>Безопасность</h3>
+            <p>Ваши данные надежно защищены с использорванием шифрования</p>
+        </div>
+    </div>
+</section>
+<section class="container text-center my-5">
+    <h2>Скачайте наше приложение</h2>
+    <p>Доступно на платформах:</p>
+    <a class="btn btn-primary px-5" href="#">Windows</a>
+    <a class="btn btn-primary px-5" href="#">Android</a>
+</section>
+
+<div class="modal fade" id="auth" tabindex="-1" aria-labelledby="authLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="authLabel">Авторизация / регистрация</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+            </div>
+            <div class="modal-body">
+                    <div class="alert alert-danger fade show" style="display: none" role="alert"></div>
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="text" class="form-control" id="email" placeholder="Ваша электронная почта">
+                    </div>
+                    <div class="form-group">
+                        <label for="login">Логин</label>
+                        <input type="text" class="form-control" id="login">
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Пароль</label>
+                        <input type="password" class="form-control" id="password">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <a class="btn btn-primary" onclick="btn_auth()">Войти</a>
+                <a class="btn btn-primary" onclick="btn_reg()">Регистрация</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}

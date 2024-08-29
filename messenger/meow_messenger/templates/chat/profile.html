@@ -1,0 +1,27 @@
+{% extends 'chat/chat_base.html' %}
+{% block content %}
+<div class="container"></div>
+<img class="rounded-circle mx-auto d-block" src="/media/{{user.avatar}}" width="300px">
+<form enctype="multipart/form-data" action="/profile" method="post">
+    {% csrf_token %}
+    <div class="m-3">
+        <label for="email" class="form-label">Email</label>
+        <input type="email" value="{{user.email}}" class="form-control" id="email" aria-describedby="emailHelp" disabled readonly>
+        <div id="emailHelp" class="form-text">Ваша электронная почта</div>
+    </div>
+    <div class="m-3">
+        <label for="login" class="form-label">Логин</label>
+        <input type="text" name="login" value="{{user.login}}" class="form-control" aria-describedby="loginHelp" id="login">
+        <div id="loginHelp" class="form-text">Отображаемое имя</div>
+    </div>
+    <div class="m-3">
+        <label for="avatar">Аватарка</label>
+        <input type="file" name="avatar" class="form-control" id="avatar">
+    </div>
+    <div class="m-3">
+        <button class="btn btn-success">Изменить данные</button>
+    </div>
+</form>
+<a class="btn btn-primary" href="/logout">Выйти</a>
+
+{% endblock %}
