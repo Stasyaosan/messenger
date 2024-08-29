@@ -39,6 +39,9 @@
     <div class="message-input">
         <input type="text" class="form-control enter-click" id="messageInput" placeholder="Введите сообщение">
         <input type="file" name="file" id="file">
+            <button class="btn btn-secondary mt-2" id="recordButton">🔴 Запись</button>
+            <audio id="audioPlayback" controls style="display:none;"></audio>
+
         <button class="btn btn-primary mt-2" onclick="sendMessage()">Отправить</button>
     </div>
 </section>
@@ -157,7 +160,7 @@
 
         socket_online.onmessage = function(event) {
             let data = JSON.parse(event['data'])['message'];
-            document.getElementById('users_online').innerHTML = data;
+            document.getElementById('users-online').innerHTML = data;
         };
 
         socket.onclose = function(e) {
