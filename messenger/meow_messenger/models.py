@@ -26,4 +26,5 @@ class Message(models.Model):
     text = models.TextField()
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     chat = models.ForeignKey(Group_chat, on_delete=models.CASCADE, default=None)
+    file = models.FileField(upload_to='files/', blank=True, null=True)
     datetime = models.DateTimeField(auto_now=True)

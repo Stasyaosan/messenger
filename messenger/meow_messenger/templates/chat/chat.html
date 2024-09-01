@@ -134,7 +134,7 @@
                         user: '{{request.session.user}}'
                     }));
                 }
-            }, 1000);
+            }, 10000);
         };
 
         socket_online.onopen = function(e) {
@@ -146,7 +146,7 @@
                         chat: {{current_chat.id}}
                     }));
                 }
-            }, 1000);
+            }, 10000);
         };
 
         socket.onmessage = function(event) {
@@ -238,5 +238,53 @@
             alert('Пустое значение!');
         }
     }
+</script>
+<script>
+    let mediaRecorder;
+let audioChunks = [];
+
+document.getElementById('recordButton').addEventListener('click', async () => {
+    if (mediaRecorder && mediaRecorder.state === 'recording') {
+        mediaRecorder.stop();
+    } else {
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            mediaRecorder = new MediaRecorder(stream);
+            mediaRecorder.ondataavailable = event => {
+                audioChunks.push(event.data);
+            };
+            mediaRecorder.onstop = () => {
+                const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                audioChunks = [];
+                const reader = new FileReader();
+                reader.readAsDataURL(audioBlob);
+                reader.onloadend = () => {
+                    const audioBase64 = reader.result.split(',')[1];
+                    const audioElement = document.getElementById('audioPlayback');
+                    audioElement.src = reader.result;
+                    audioElement.style.display = 'block';
+
+                    const data = {
+                        message: '',
+                        user: '{{request.session.user}}',
+                        chat: {{current_chat.id}},
+                        file: `data:audio/wav;base64,${audioBase64}`,
+                        filename: 'audio_message.wav'
+                    };
+                    let messageData = JSON.stringify(data);
+                    if (socket.readyState === WebSocket.OPEN) {
+                        socket.send(messageData);
+                    } else {
+                        messageQueue.push(messageData);
+                    }
+                };
+            };
+            mediaRecorder.start();
+        } else {
+            alert('Your browser does not support audio recording');
+        }
+    }
+});
+
 </script>
 {% endblock %}
