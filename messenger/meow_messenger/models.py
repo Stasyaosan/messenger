@@ -11,6 +11,7 @@ class User(models.Model):
     token = models.TextField(null=True, blank=True)
     suc = models.IntegerField(default=0)
     update_date = models.DateTimeField(auto_now=True)
+    token_api = models.CharField(max_length=100, default=None)
 
 
 class Group_chat(models.Model):

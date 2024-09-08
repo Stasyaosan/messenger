@@ -31,7 +31,7 @@ def ajaxReg(request):
     if User.objects.filter(email=email).exists():
         return HttpResponse('1')
 
-    user = User(login=login, email=email, password=make_password(password), token=token)
+    user = User(login=login, email=email, password=make_password(password), token=token, token_api=generate_Token())
     user.save()
 
     url = 'http://127.0.0.1:8000/suc/' + token + ''

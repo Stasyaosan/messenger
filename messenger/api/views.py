@@ -4,6 +4,7 @@ from django.shortcuts import get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 from meow_messenger.models import *
 import json
+from django.contrib.auth.hashers import make_password, check_password
 
 
 @csrf_exempt
@@ -69,3 +70,34 @@ def add_chat(request):
         return HttpResponse('Ok')
     else:
         return HttpResponse('Данные охраняются саблизубыми котиками^^')
+
+
+@csrf_exempt
+def del_chat(request):
+    if request.method == 'POST':
+        try:
+            id_chat = (int(request.POST['id_chat']))
+            Group_chat.objects.filter(id=id_chat).delete()
+        except:
+            return HttpResponse('del error')
+        return HttpResponse('Ok')
+    else:
+        return HttpResponse('del error')
+
+
+@csrf_exempt
+def auth(request):
+    if request.method == 'POST':
+        try:
+            email = request.POST['email']
+            password = request.POST['password']
+            if User.objects.filter(email=email).exists():
+                user = get_object_or_404(User, email=email)
+                if check_password(password, user.password):
+                    return HttpResponse(json.dumps({'token': user.token_api}))
+                else:
+                    return HttpResponse('Неверный пароль!')
+            else:
+                return HttpResponse('Такого логина не существует')
+        except:
+            return HttpResponse('auth error')
