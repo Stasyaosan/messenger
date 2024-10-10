@@ -24,7 +24,6 @@ class YourConsumer(AsyncWebsocketConsumer):
             res = ''
             for message in messager:
                 img = ''
-                print(message.file)
                 if message.file != '':
                     if str(message.file).endswith('wav'):
                         img = '<audio id="audioPlayback" controls="" style="display: block;" src="media/' + str(
@@ -51,7 +50,6 @@ class YourConsumer(AsyncWebsocketConsumer):
             m.chat = Group_chat.objects.filter(id=d['chat']).first()
             m.user = User.objects.filter(email=d['user']).first()
             if 'file' in d:
-                print(d)
                 file_data = d['file'].split(';base64,')[1]
                 file_content = base64.b64decode(file_data)
                 m.file.save(d['filename'], ContentFile(file_content))
@@ -62,7 +60,6 @@ class YourConsumer(AsyncWebsocketConsumer):
             res = ''
             for message in messager:
                 img = ''
-                print(message.file)
                 if message.file != '':
                     if str(message.file).endswith('wav'):
                         img = '<audio id="audioPlayback" controls="" style="display: block;" src="media/' + str(

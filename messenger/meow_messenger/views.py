@@ -23,7 +23,6 @@ def generate_Token():
 
 
 def ajaxReg(request):
-    print(request.POST)
     email = request.POST['email']
     login = request.POST['login']
     password = request.POST['password']
