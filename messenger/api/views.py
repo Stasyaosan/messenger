@@ -66,7 +66,7 @@ def get_chats(request):
 
 
 @csrf_exempt
-def add_chat(request):
+def create_chat(request):
     if request.method == 'POST':
         id_creator = int(request.POST['id_creator'])
         title = request.POST['title']
@@ -76,9 +76,9 @@ def add_chat(request):
         chat = Group_chat(title=title, description=description, creator=creator)
         chat.save()
         chat.users.add(creator)
-        return HttpResponse('Ok')
+        return HttpResponse(json.dumps({'status': 'ok'}))
     else:
-        return HttpResponse('Данные охраняются саблизубыми котиками^^')
+        return HttpResponse(json.dumps({'status': 'Error post request'}))
 
 
 @csrf_exempt
@@ -157,3 +157,13 @@ def DeleteMessage(request):
     id_message = request.POST['id_message']
     Message.objects.filter(id=id_message).delete()
     return HttpResponse(json.dumps({'status': 'ok'}))
+
+
+@csrf_exempt
+def get_users(request):
+    users_dict = {}
+    users = User.objects.all()
+    for user in users:
+        users_dict[user.id] = user.login
+    return HttpResponse(json.dumps(users_dict))
+

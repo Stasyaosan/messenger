@@ -16,7 +16,7 @@ class User(models.Model):
 
 class Group_chat(models.Model):
     title = models.CharField(max_length=100)
-    description = models.TextField(max_length='1000')
+    description = models.TextField(max_length=1000)
     users = models.ManyToManyField(User, related_name='users')
     avatar = models.ImageField(upload_to='avatars_chat/', default='avatars_chat/default.png')
     created_date = models.DateTimeField(auto_now=True)
