@@ -7,6 +7,7 @@ from meow_messenger.models import *
 import json
 from django.contrib.auth.hashers import make_password, check_password
 from meow_messenger.views import generate_Token
+from django.core import serializers
 
 
 @csrf_exempt
@@ -88,10 +89,10 @@ def del_chat(request):
             id_chat = (int(request.POST['id_chat']))
             Group_chat.objects.filter(id=id_chat).delete()
         except:
-            return HttpResponse('del error')
-        return HttpResponse('Ok')
+            return HttpResponse(json.dumps({'status': 'del error'}))
+        return HttpResponse(json.dumps({'status': 'ok'}))
     else:
-        return HttpResponse('del error')
+        return HttpResponse(json.dumps({'status': 'del error'}))
 
 
 @csrf_exempt
@@ -167,3 +168,39 @@ def get_users(request):
         users_dict[user.id] = user.login
     return HttpResponse(json.dumps(users_dict))
 
+
+@csrf_exempt
+def add_user_to_chat(request):
+    if request.method == 'POST':
+        id_user = request.POST['id_user']
+        id_chat = request.POST['id_chat']
+        chat = get_object_or_404(Group_chat, id=id_chat)
+        user = get_object_or_404(User, id=id_user)
+        chat.users.add(user)
+        chat.save()
+
+        return HttpResponse(json.dumps({'status': 'ok'}))
+
+
+@csrf_exempt
+def delete_user_to_chat(request):
+    id_user = request.POST['id_user']
+    id_chat = request.POST['id_chat']
+    chat = get_object_or_404(Group_chat, id=id_chat)
+    user = get_object_or_404(User, id=id_user)
+    chat.users.remove(user)
+    chat.save()
+
+    return HttpResponse(json.dumps({'status': 'ok'}))
+
+
+@csrf_exempt
+def get_users_from_chat(request):
+    if request.method == 'POST':
+        id_chat = request.POST['id_chat']
+        chat = Group_chat.objects.filter(id=id_chat).first()
+        users = chat.users.all()
+
+        json_data = serializers.serialize('json', users)
+
+        return HttpResponse(json.dumps({'status': 'ok', 'users': json_data}))
