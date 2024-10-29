@@ -80,8 +80,6 @@ class YourConsumer(AsyncWebsocketConsumer):
                     res += "<div class='message'><div class='user'>" + message.user.login + "</div><span class='text'><p>" + img + "</p>" + message.text + "<br /><span style='font-size: 11px'>" + res_date + "</span>" + rr + "</span></div>"
             return res
 
-            return ""
-
     async def websocket_receive(self, text_data):
         response = await self.save_message(json.loads(text_data['text']))
         await self.send(text_data=json.dumps({"message": response}))

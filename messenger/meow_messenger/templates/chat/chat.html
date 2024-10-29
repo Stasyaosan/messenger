@@ -126,15 +126,14 @@
                 let queuedMessage = messageQueue.shift();
                 socket.send(queuedMessage);
             }
-            setInterval(function() {
+            
                 if (socket.readyState === WebSocket.OPEN) {
                     socket.send(JSON.stringify({
                         message: 'list',
                         chat: {{current_chat.id}},
                         user: '{{request.session.user}}'
                     }));
-                }
-            }, 10000);
+                }   
         };
 
         socket_online.onopen = function(e) {
